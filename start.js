@@ -39,15 +39,20 @@ export function main(args) {
     source: new VectorSource({wrapX: false}),
     updateWhileInteracting: true,
   });
+
+  // add more levels of zoom
+  var resolutions = raster.getSource().getTileGrid().getResolutions();
+  resolutions = resolutions.concat( [2,4,8].map(function(x) {return this/x }, Math.min(...resolutions))  )
   
   var map = new Map({
     layers: [raster, vector],
     target: 'map',
     view: new View({
-      resolutions: raster.getSource().getTileGrid().getResolutions(),
+      resolutions: resolutions,
       extent: extent,
       constrainOnlyCenter: true,
       center: getCenter(extent),
+      zoomFactor: 2,
     }),
     controls: [],
     interactions: [],
