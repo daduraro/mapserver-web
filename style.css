@@ -14,13 +14,6 @@ html, body, #map {
     border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
-
-    max-height: 40vmin;
-    height: max-content;
-
-    min-width: 10vmin;
-    max-width: 40vmin;
-    width: max-content;
 }
 .ol-popup:after, .ol-popup:before {
     top: 100%;
@@ -55,6 +48,16 @@ html, body, #map {
     content: "✖";
 }
 
+#popup-content, #popup-content-edit {
+    max-height: 40vmin;
+    height: max-content;
+    min-width: 10vmin;
+    max-width: 40vmin;
+    width: max-content;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 
 #title {
     overflow-x: hidden;
@@ -63,7 +66,7 @@ html, body, #map {
 }
 #descr {
     overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     width: 100%;
 }
 
@@ -85,3 +88,21 @@ html, body, #map {
     border: none;
     resize: none;
 }
+
+
+* {
+    scrollbar-width: thin;
+  }
+  
+  /* Works on Chrome/Edge/Safari */
+  *::-webkit-scrollbar {
+    width: 12px;
+  }
+  *::-webkit-scrollbar-track {
+    background: gray;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 20px;
+    border: 3px solid gray;
+  }
