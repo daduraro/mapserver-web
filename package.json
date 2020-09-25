@@ -1,35 +1,31 @@
 {
-  "name": "ol-workshop",
-  "description": "OpenLayers workshop",
+  "name": "mapserver",
+  "description": "My custom map server",
   "version": "0.0.0",
   "private": true,
   "main": "main.js",
   "dependencies": {
-    "colormap": "2.3.1",
-    "ol": "6.0.0-beta.6",
-    "ol-hashed": "2.0.0",
-    "ol-mapbox-style": "4.3.1",
-    "ol-ext": "3.1.14",
-    "jquery": "3.5.1"
+    "ol": "6.4.3",
+    "ol-ext": "3.1.14"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "5.0.2",
-    "css-loader": "2.1.1",
-    "eslint": "5.16.0",
-    "eslint-config-openlayers": "11.0.0",
-    "extract-text-webpack-plugin": "3.0.2",
-    "html-webpack-plugin": "3.2.0",
-    "kompas": "0.0.1",
-    "style-loader": "0.23.1",
-    "webpack": "4.29.6",
-    "webpack-cli": "^3.3.0",
+    "copy-webpack-plugin": "6.1.1",
+    "css-loader": "4.3.0",
+    "file-loader": "6.1.0",
+    "html-webpack-plugin": "4.5.0",
+    "style-loader": "1.2.1",
+    "url-loader": "4.1.0",
+    "eslint": "7.9.0",
+    "eslint-config-openlayers": "14.0.0",
+    "webpack": "4.44.2",
+    "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0"
   },
   "eslintConfig": {
     "extends": "openlayers"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src",
     "test": "npm run lint",
     "start": "webpack-dev-server --mode=development",
     "build": "webpack --mode=production"

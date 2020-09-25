@@ -2,11 +2,15 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 
+const PATHS = {
+  build: path.join(__dirname, './build')
+};
+
 module.exports = {
-  entry: './main.js',
+  entry: './src/main.js',
   output: {
-    path: path.resolve(__dirname, 'build'),
-    filename: 'main.js'
+    path: PATHS.build,
+    filename: 'main.js',
   },
   devtool: 'source-map',
   devServer: {
@@ -19,11 +23,31 @@ module.exports = {
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']
-      }
+      },
+      { 
+        test: /\.(woff|woff2|eot|ttf|svg)$/, 
+        use: {
+          loader: 'file-loader',
+          options: {
+            outputPath: 'fonts/',
+            name: '[name][hash].[ext]',
+          },
+        },
+      },
+      { 
+        test: /\.(jpg)$/, 
+        use: {
+          loader: 'file-loader',
+          options: {
+            outputPath: 'img/',
+            name: '[name][hash].[ext]',
+          },
+        },
+      },
     ]
   },
   plugins: [
-    new CopyPlugin([{from: 'data', to: 'data'}]),
+    //new CopyPlugin([{from: 'data', to: 'data'}]),
     new HtmlPlugin({
       template: 'index.html'
     })

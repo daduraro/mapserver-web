@@ -7,10 +7,9 @@
   </head>
   <body>
     <div id="map"></div>
-
     <div id="popup" class="ol-popup">
-      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-      <div id="popup-content-edit">
+      <a href="#" id="popup-closer" class="ol-popup-closer ol-popup-icon"></a>
+      <div id="popup-content-edit" tabindex="-1">
         <textarea id="title-edit" name="Title" placeholder="Name"></textarea>
         <textarea id="descr-edit" name="Description" placeholder="Description"></textarea>
       </div>
@@ -18,7 +17,13 @@
         <div id="title"></div>
         <div id="descr"></div>
       </div>
+      <div class="ol-popup-bottombar">
+        <div><a href="#" tabindex="-1" id="popup-deleter" class="ol-popup-deleter ol-popup-icon icon-trash-empty"></a></div>
+        <div class="grid-right">
+          <a href="#" id="popup-edit" class="ol-popup-edit ol-popup-icon icon-pencil"></a>
+          <a href="#" id="popup-ok" class="ol-popup-ok ol-popup-icon">OK</a>
+        </div>
+      </div>
     </div>
-
   </body>
 </html>

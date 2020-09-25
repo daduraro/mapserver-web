@@ -1,6 +1,7 @@
 // webpack import styles
 import 'ol/ol.css';
-import './style.css';
+import '../css/style.css';
+import '../fontello/css/fontello.css'
 import 'ol-ext/dist/ol-ext.css';
 
 // import from ol package
@@ -63,15 +64,31 @@ export function main(args) {
   map.addInteraction(new PinchZoom());
   map.addInteraction(new DragPan());
   
-  function addPoint(e)
+  function createPoint(interactionEvent)
   {
-    let p = new Feature(new Point(e.coordinate));
-    vector.getSource().addFeature(p);
-    setSelected(p);
+    let point = new Feature(new Point(interactionEvent.coordinate));
+    point.info = {
+      id: (async () => {
+        fetch("create_point", {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(point.getGeometry().getFlatCoordinates())
+        }).then((response) => response.json())
+          .then((data) => data.id)
+      })(),
+      title: "",
+      descr: ""
+    };
+    vector.getSource().addFeature(point);
+    setSelected(point);
   };
+
   
   map.addInteraction(new LongTouch({
-    handleLongTouchEvent: addPoint,
+    handleLongTouchEvent: createPoint,
   }))
   
   var select = new Select();
@@ -82,6 +99,10 @@ export function main(args) {
   var closer = document.getElementById('popup-closer');
   var content = document.getElementById('popup-content');
   var content_edit = document.getElementById('popup-content-edit');
+
+  var edit_button = document.getElementById('popup-edit');
+  var ok_button = document.getElementById('popup-ok');
+  var delete_button = document.getElementById('popup-deleter');
   
   var popup = new Overlay({
     element: container,
@@ -104,6 +125,36 @@ export function main(args) {
   select.on('select', function (e) {
     updatePopup()
   });
+
+  function getCurrentFeature() {
+    if (select.getFeatures().getLength()) {
+      return select.getFeatures().item(0);
+    }
+    return null;
+  }
+
+  edit_button.onclick = function() {
+    let feature = getCurrentFeature();
+    if (feature) {
+      setPopupEditContent(feature);
+    }
+  }
+  ok_button.onclick = function() {
+    let feature = getCurrentFeature();
+    if (feature) {
+      setPopupDisplayContent(feature);
+    }
+  }
+
+  delete_button.onclick = function() {
+    let feature = getCurrentFeature();
+    if (feature && confirm("Are you sure you want to delete?"))
+    {
+      setSelected(undefined);
+      vector.getSource().removeFeature(feature);
+      deleteContent(feature);
+    }
+  }
   
   closer.onclick = function () {
     setSelected(undefined);
@@ -113,9 +164,8 @@ export function main(args) {
   
   function updatePopup()
   {
-    if (select.getFeatures().getLength())
-    {
-      let feature = select.getFeatures().item(0);
+    let feature = getCurrentFeature();
+    if (feature) {
       popup.setPosition(feature.getGeometry().getCoordinates());
       setPopupContent(feature);
     }
@@ -141,6 +191,8 @@ export function main(args) {
   {
     content.hidden = false;
     content_edit.hidden = true;
+    edit_button.hidden = false;
+    ok_button.hidden = true;
   
     var title = document.getElementById("title");
     var descr = document.getElementById("descr");
@@ -151,20 +203,15 @@ export function main(args) {
     const regex = /[\r]?\n/g;
     title.innerHTML = feature.info.title.replaceAll(regex, "<br/>");
     descr.innerHTML = feature.info.descr.replaceAll(regex, "<br/>");
-  
-    console.log(title);
   }
   
   function setPopupEditContent(feature)
   {
     content_edit.hidden = false;
     content.hidden = true;
+    edit_button.hidden = true;
+    ok_button.hidden = false;
     
-    if (feature.info === undefined)
-    {
-      feature.info = {title: "", descr: ""};
-    }
-  
     var title = document.getElementById("title-edit");
     var descr = document.getElementById("descr-edit");
   
@@ -172,26 +219,77 @@ export function main(args) {
   
     title.value = feature.info.title;
     descr.value = feature.info.descr;
+
+    var saveDelayable = new DelayableFunc(()=>saveContent(feature));
   
     title.oninput = function() {
       feature.info.title = title.value;
+      saveDelayable.delay(1000);
     };
   
     descr.oninput = function() {
       feature.info.descr = descr.value;
+      saveDelayable.delay(1000);
     }
   }
+
+  async function saveContent(e)
+  {
+    return fetch("modify_point", {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({id: await e.info.id, ...e.info})
+    })
+  }
+
+  async function deleteContent(e)
+  {
+    return fetch("delete_point", {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({id: await e.info.id, ...e.info})
+    })
+  }
   
-  var f = new DelayableFunc(function() { console.log("hey!") }, 1000);
-  
-  function DelayableFunc(func, timeout)
+  function DelayableFunc(func)
   {
     const run = timeout => setTimeout(func, timeout)
-    this.handler = run(timeout)
-    this.delay = timeout => {
+    this.handler = undefined
+    this.delay = (timeout) => {
       clearTimeout(this.handler)
       this.handler = run(timeout)
     }
   }
 
+  window.onkeydown = function(event) {
+    if (event.key == 'Escape')
+    {
+      setSelected(undefined)
+    }
+  }
+
+  fetch('get_points', {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }})
+      .then((response) => response.json())
+      .then((data) => {
+        for (point in data)
+        {
+          let feature = new Feature(new Point(point.coordinate));
+          feature.info = {
+            id: point.id,
+            title: point.title,
+            descr: point.descr,
+          }
+          vector.getSource().addFeature(p);
+        }
+      });
 }
