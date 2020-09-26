@@ -26,8 +26,8 @@ import { getCenter } from 'ol/extent';
 export function main(args) {
 
   var raster_source = new Zoomify({
-    url: args.imgUrl,
-    size: [args.imgWidth, args.imgHeight],
+    url: args.img_url,
+    size: [args.img_width, args.img_height],
     crossOrigin: 'anonymous',
     zDirection: -1,
   });
@@ -68,17 +68,15 @@ export function main(args) {
   {
     let point = new Feature(new Point(interactionEvent.coordinate));
     point.info = {
-      id: (async () => {
-        fetch("create_point", {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(point.getGeometry().getFlatCoordinates())
-        }).then((response) => response.json())
-          .then((data) => data.id)
-      })(),
+      id: fetch("create_point", {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(point.getGeometry().getFlatCoordinates())
+          }).then((response) => response.json())
+            .then((data) => data.id),
       title: "",
       descr: ""
     };
@@ -241,7 +239,7 @@ export function main(args) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id: await e.info.id, ...e.info})
+      body: JSON.stringify({...e.info, id: await e.info.id})
     })
   }
 
@@ -250,10 +248,9 @@ export function main(args) {
     return fetch("delete_point", {
       method: 'DELETE',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({id: await e.info.id, ...e.info})
+      body: JSON.stringify({id: await e.info.id})
     })
   }
   
@@ -281,7 +278,7 @@ export function main(args) {
     }})
       .then((response) => response.json())
       .then((data) => {
-        for (point in data)
+        for (let point of data)
         {
           let feature = new Feature(new Point(point.coordinate));
           feature.info = {
@@ -289,7 +286,7 @@ export function main(args) {
             title: point.title,
             descr: point.descr,
           }
-          vector.getSource().addFeature(p);
+          vector.getSource().addFeature(feature);
         }
       });
 }

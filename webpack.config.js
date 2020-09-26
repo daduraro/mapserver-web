@@ -12,7 +12,7 @@ module.exports = {
     path: PATHS.build,
     filename: 'main.js',
   },
-  devtool: 'source-map',
+  devtool: false,
   devServer: {
     port: 3000,
     clientLogLevel: 'none',
