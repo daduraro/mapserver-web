@@ -28,6 +28,7 @@
     "lint": "eslint src",
     "test": "npm run lint",
     "start": "webpack-dev-server --mode=development",
-    "build": "webpack --mode=production"
+    "build": "webpack --mode=production",
+    "dev": "webpack --mode=development"
   }
 }
