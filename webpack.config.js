@@ -25,7 +25,7 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       },
       { 
-        test: /\.(woff|woff2|eot|ttf|svg)$/, 
+        test: /\.(woff|woff2)$/, 
         use: {
           loader: 'file-loader',
           options: {
@@ -41,6 +41,15 @@ module.exports = {
           options: {
             outputPath: 'img/',
             name: '[name][hash].[ext]',
+          },
+        },
+      },
+      { 
+        test: /favicon\.svg$/, 
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]'
           },
         },
       },

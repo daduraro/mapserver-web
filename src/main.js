@@ -1,4 +1,5 @@
 import {main} from './start.js';
+import '../favicon.svg'
 
 fetch('data.json', {
     headers: {
