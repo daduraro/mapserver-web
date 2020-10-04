@@ -79,11 +79,13 @@ html, body, #map {
     overflow-x: hidden;
     font-size: large;
     font-weight: bold;
+    white-space: pre-wrap;
 }
 #descr {
     overflow-x: hidden;
     overflow-y: hidden;
     width: 100%;
+    white-space: pre-wrap;
 }
 
 #title-edit {

@@ -197,10 +197,18 @@ export function main(args) {
     
     title.hidden = feature.info.title === "";
     descr.hidden = feature.info.descr === "";
-  
-    const regex = /[\r]?\n/g;
-    title.innerHTML = feature.info.title.replaceAll(regex, "<br/>");
-    descr.innerHTML = feature.info.descr.replaceAll(regex, "<br/>");
+
+    // clear children
+    while (title.firstChild)
+    {
+      title.firstChild.remove();
+    }
+    while (descr.firstChild)
+    {
+      descr.firstChild.remove();
+    }
+    title.appendChild(document.createTextNode(feature.info.title));
+    descr.appendChild(document.createTextNode(feature.info.descr));
   }
   
   function setPopupEditContent(feature)
