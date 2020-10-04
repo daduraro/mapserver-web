@@ -19,3 +19,7 @@ npm run build
 ### Icons
 
 The font-based icons were obtained from [Fontello](http://fontello.com/) with the `fontello.config.json` (see [fontello-cli](https://github.com/paulyoung/fontello-cli) for a command-based way to obtain them).
+
+# Disclaimer
+
+This is a very early-stage pet project. It can (and will) contain critical security issues.
