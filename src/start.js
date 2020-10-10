@@ -14,16 +14,34 @@ import DragPan from 'ol/interaction/DragPan';
 import {Vector as VectorSource} from 'ol/source';
 import {Select} from 'ol/interaction';
 import {Point} from 'ol/geom';
-import {} from 'ol/events/condition';
 import Feature from 'ol/Feature';
 import Overlay from 'ol/Overlay';
+import { Style, Fill, Stroke, Circle } from 'ol/style';
+import {mouseOnly, touchOnly, singleClick, never} from 'ol/events/condition';
+import PointerInteraction from 'ol/interaction/Pointer';
 
 // import from ol-ext package
 import LongTouch from 'ol-ext/interaction/LongTouch';
 
 import { getCenter } from 'ol/extent';
+import { Collection } from 'ol';
+
 
 export function main(args) {
+
+  var unselectedPointStyle = new Style({
+    image: new Circle({
+      fill: new Fill({
+        color: 'rgba(255,255,255,0.4)'
+      }),
+      stroke: new Stroke({
+        color: '#3399CC',
+        width: 2.25
+      }),
+      radius: 7
+    }),
+    zIndex: Infinity,
+  });
 
   var raster_source = new Zoomify({
     url: args.img_url,
@@ -38,8 +56,10 @@ export function main(args) {
   
   var vector = new VectorLayer({
     source: new VectorSource({wrapX: false}),
+    style: unselectedPointStyle,
     updateWhileInteracting: true,
   });
+
 
   // add more levels of zoom
   var resolutions = raster.getSource().getTileGrid().getResolutions();
@@ -60,12 +80,67 @@ export function main(args) {
   });
   map.getView().fit(extent);
   
+  /////////////////////////////////////////////////
+  // INTERACTIONS
+  /////////////////////////////////////////////////
   map.addInteraction(new MouseWheelZoom());
   map.addInteraction(new PinchZoom());
   map.addInteraction(new DragPan());
   
+  map.addInteraction(new LongTouch({
+    handleLongTouchEvent: createPoint,
+  }))
+
+  var selectedElements = new Collection();
+  map.addInteraction((() => {
+    let sel = new Select(
+    {
+      features: selectedElements,
+      layers: [vector],
+      condition: (e) => mouseOnly(e) && singleClick(e),
+      toggleCondition: never,
+    });
+    sel.on('select', (e) => updatePopup());
+    return sel
+  })());
+  
+  map.addInteraction((() => {
+    let sel = new Select(
+    {
+      features: selectedElements,
+      layers: [vector],
+      condition: (e) => touchOnly(e) && singleClick(e),
+      toggleCondition: never,
+      hitTolerance: 10, // are those 96dpi px? or should they be scaled with window.devicePixelRatio ?
+    });
+    sel.on('select', (e) => updatePopup());
+    return sel;
+  })());
+
+  // add event pointer event sink when creating a point
+  map.addInteraction(new PointerInteraction({
+    handleEvent: (e) => {
+      if (e.type == "singleclick")
+      {
+        return !creatingPoint; // absorb singleclick events when creating point
+      }
+      return true;
+    }
+  }));
+
+  /////////////////////////////////////////////////
+  // LOGIC
+  /////////////////////////////////////////////////
+
+  // create point logic
+  var creatingPoint = false;
+  var creatingPointToFalse = new DelayableFunc(()=>{
+    creatingPoint = false;
+  });
   function createPoint(interactionEvent)
   {
+    creatingPoint = true;
+    creatingPointToFalse.delay(2000);
     let point = new Feature(new Point(interactionEvent.coordinate));
     point.info = {
       id: fetch("create_point", {
@@ -84,14 +159,6 @@ export function main(args) {
     setSelected(point);
   };
 
-  
-  map.addInteraction(new LongTouch({
-    handleLongTouchEvent: createPoint,
-  }))
-  
-  var select = new Select();
-  map.addInteraction(select)
-  
   // popup logic
   var container = document.getElementById('popup');
   var closer = document.getElementById('popup-closer');
@@ -113,20 +180,16 @@ export function main(args) {
   
   function setSelected(e)
   {
-    select.getFeatures().clear();
+    selectedElements.clear();
     if (e) {
-      select.getFeatures().push(e);
+      selectedElements.push(e);
     }
     updatePopup();
   }
   
-  select.on('select', function (e) {
-    updatePopup()
-  });
-
   function getCurrentFeature() {
-    if (select.getFeatures().getLength()) {
-      return select.getFeatures().item(0);
+    if (selectedElements.getLength()) {
+      return selectedElements.item(0);
     }
     return null;
   }
